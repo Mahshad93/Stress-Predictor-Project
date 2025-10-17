@@ -1,0 +1,7 @@
+streamlit
+torch
+numpy
+matplotlib
+joblib
+google-generativeai
+scikit-learn
