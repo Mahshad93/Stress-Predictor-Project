@@ -53,19 +53,31 @@ def generate_advice(level, hrv, activity, sleep, bp, rr):
 
 # Real LLM chat using Gemini API
 def chat_with_llm(user_input, stress_level):
-    api_key = "AIzaSyAhlBaVV-MQfMZZKm5qvaJbJfBGOT3HshU"  # Replace with your actual Gemini API key
-    genai.configure(api_key=api_key)
-    if not api_key or api_key == "your-gemini-api-key-here":
-        return "Error: Please replace 'your-gemini-api-key-here' with your actual API key."
-    
-    model = genai.GenerativeModel('gemini-2.0-flash')  # Updated model name for 2025
-    prompt = f"You are a supportive chat bot for stress management. The user's stress level is {['low', 'medium', 'high'][stress_level]}. Respond empathetically, offer practical tips, and keep it short (2-3 sentences). User: {user_input}"
-    
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        return "The chatbot is currently disabled because the Gemini API key is not configured."
+
     try:
+        genai.configure(api_key=api_key)
+
+        model = genai.GenerativeModel("gemini-2.0-flash")
+
+        stress_labels = ["low", "medium", "high"]
+        stress_text = stress_labels[stress_level] if stress_level in [0, 1, 2] else "unknown"
+
+        prompt = f"""
+        You are a supportive chatbot for stress management.
+        The user's predicted stress level is {stress_text}.
+        Respond empathetically, give short and practical stress-management suggestions, and avoid medical diagnosis.
+        User: {user_input}
+        """
+
         response = model.generate_content(prompt)
         return response.text
+
     except Exception as e:
-        return f"Error: {str(e)}. Check your API key or internet connection."
+        return f"Chatbot error: {str(e)}"
 
 # Load background image as base64 with fallback
 background_path = os.path.join(base_dir, 'background.jpg')
