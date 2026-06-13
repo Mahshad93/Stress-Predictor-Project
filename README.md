@@ -31,15 +31,14 @@ The model uses the following input variables:
 
 ## Technologies Used
 
-* Python
-* Streamlit
-* PyTorch
-* NumPy
-* Scikit-learn
-* Joblib
-* Matplotlib
-* Google Gemini API
-* Docker
+- Python
+- Streamlit
+- PyTorch
+- NumPy
+- Scikit-learn
+- Joblib
+- Google Gemini API
+- Docker
 
 ## Project Structure
 
@@ -80,7 +79,16 @@ cd Stress-Predictor-Project
 
 Create and activate a virtual environment:
 
-```bash
+For PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+For Command Prompt:
+
+```cmd
 python -m venv .venv
 .venv\Scripts\activate
 ```
