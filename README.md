@@ -6,6 +6,10 @@ This project is a proof-of-concept AI application for predicting stress levels u
 
 The project combines machine learning, an interactive Streamlit interface, an optional Gemini-powered chatbot, and Docker-based deployment preparation.
 
+## App Screenshot
+
+![Stress Predictor App](images/app_screenshot.png)
+
 ## Features
 
 * Predicts stress level as Low, Medium, or High

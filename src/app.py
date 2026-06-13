@@ -5,11 +5,17 @@ import torch
 import torch.nn as nn
 import numpy as np
 import streamlit as st
-import matplotlib.pyplot as plt
 import joblib
 import os
 import base64
 import google.generativeai as genai
+
+st.set_page_config(
+    page_title="Stress Level Prediction App",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # Define the enhanced model architecture with 5 inputs (HRV, Activity, Sleep, BP, RR)
 class StressPredictor(nn.Module):
@@ -45,11 +51,11 @@ scaler = joblib.load(scaler_path)
 def generate_advice(level, hrv, activity, sleep, bp, rr):
     warnings = ["Low stress: Good job, but stay vigilant!", "Medium stress: Attention needed!", "High stress: Urgent action required!"]
     recommendations = [
-        f"Recommendation: Maintain habits. With HRV {hrv:.1f}, activity {activity}, sleep {sleep:.1f}, BP {bp:.1f}, RR {rr:.1f}, consider mindfulness."
-        , f"Recommendation: Take a break. With HRV {hrv:.1f}, activity {activity}, sleep {sleep:.1f}, BP {bp:.1f}, RR {rr:.1f}, try deep breathing and more sleep."
-        , f"Recommendation: Consult a doctor. With HRV {hrv:.1f}, activity {activity}, sleep {sleep:.1f}, BP {bp:.1f}, RR {rr:.1f}, reduce workload and relax."
-    ]
-    return f"**Warning:** {warnings[level]} {recommendations[level]}"
+    f"Recommendation: Maintain healthy habits. HRV: {int(hrv)} ms, activity: {int(activity)} steps, sleep: {sleep:.1f} hours, BP: {int(bp)} mmHg, RR: {int(rr)} breaths/min.",
+    f"Recommendation: Take a short break, practice deep breathing, and prioritize sleep. HRV: {int(hrv)} ms, activity: {int(activity)} steps, sleep: {sleep:.1f} hours, BP: {int(bp)} mmHg, RR: {int(rr)} breaths/min.",
+    f"Recommendation: Reduce workload, rest, and consider seeking professional advice if stress symptoms continue. HRV: {int(hrv)} ms, activity: {int(activity)} steps, sleep: {sleep:.1f} hours, BP: {int(bp)} mmHg, RR: {int(rr)} breaths/min."
+]
+    return f"{warnings[level]}<br>{recommendations[level]}"
 
 # Real LLM chat using Gemini API
 def chat_with_llm(user_input, stress_level):
@@ -91,58 +97,152 @@ if os.path.exists(background_path):
 else:
     st.warning("Background image 'background.jpg' not found, using default background.")
 
-# Custom CSS for layout and styling
+
+# Custom CSS for a cleaner portfolio-ready layout
 st.markdown(
     f"""
     <style>
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
+
     .stApp {{
-        background-image: {'url("data:image/jpg;base64,%s")' % base64_image if base64_image else 'none'};
+        background-image: {'linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.88)), url("data:image/jpg;base64,%s")' % base64_image if base64_image else 'none'};
         background-size: cover;
         background-position: center;
-        padding: 20px;
-        font-size: 1.8em;
+        background-attachment: fixed;
+        font-family: "Segoe UI", sans-serif;
     }}
-    .header {{
-        background-color: #697682;
+
+    .block-container {{
+        max-width: 950px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }}
+
+    .main-header {{
+        background: linear-gradient(135deg, #1F2937, #4F8EF7);
         color: white;
-        padding: 10px;
+        padding: 2rem 1.5rem;
         text-align: center;
-        border-radius: 5px;
+        border-radius: 22px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
     }}
-    .stSlider, .stButton {{
-        background-color: #3498db;
+
+    .main-header h1 {{
+        font-size: 2.6rem;
+        margin-bottom: 0.4rem;
+        font-weight: 750;
+    }}
+
+    .main-header p {{
+        font-size: 1rem;
+        color: #E5E7EB;
+        margin: 0;
+    }}
+
+    .section-card {{
+        background-color: rgba(255,255,255,0.94);
+        padding: 1.6rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        margin-bottom: 1.4rem;
+        border: 1px solid rgba(229,231,235,0.9);
+    }}
+
+    .section-title {{
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 0.8rem;
+    }}
+
+    .stSlider label {{
+        color: #1F2937 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }}
+
+    div[data-testid="stSlider"] {{
+        padding-bottom: 0.6rem;
+    }}
+
+    .stButton > button {{
+        width: 100%;
+        border-radius: 12px;
+        padding: 0.7rem 1rem;
+        font-weight: 700;
+        border: none;
+        background-color: #4F8EF7;
         color: white;
-        border-radius: 5px;
-        padding: 5px;
-        font-size: 1.6em;
+        transition: 0.2s;
     }}
-    .stButton:hover {{
-        background-color: #2980b9;
+
+    .stButton > button:hover {{
+        background-color: #2563EB;
+        color: white;
     }}
+
     .result-box {{
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
+        background-color: white;
+        padding: 1.3rem;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        margin-top: 1rem;
+        border-left: 7px solid #4F8EF7;
     }}
-    .green-text {{
-        color: #27ae60;
-        font-weight: bold;
+
+    .result-title {{
+        font-size: 1.25rem;
+        font-weight: 750;
+        margin-bottom: 0.5rem;
     }}
-    .yellow-text {{
-        color: #f39c12;
-        font-weight: bold;
+
+    .low-result {{
+        color: #047857;
+        border-left-color: #10B981;
     }}
-    .red-text {{
-        color: #c0392b;
-        font-weight: bold;
+
+    .medium-result {{
+        color: #B45309;
+        border-left-color: #F59E0B;
     }}
+
+    .high-result {{
+        color: #B91C1C;
+        border-left-color: #EF4444;
+    }}
+
+    .recommendation-text {{
+        color: #374151;
+        font-size: 0.98rem;
+        line-height: 1.6;
+    }}
+
     .chat-box {{
-        background-color: #ecf0f1;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
+        background-color: rgba(255,255,255,0.94);
+        padding: 1.2rem;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        margin-top: 1rem;
+    }}
+
+    section[data-testid="stSidebar"] {{
+        background-color: #F3F6FA;
+    }}
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {{
+        color: #1F2937;
+    }}
+
+    .footer-text {{
+        text-align: center;
+        color: #6B7280;
+        font-size: 0.85rem;
+        margin-top: 2rem;
     }}
     </style>
     """,
@@ -150,87 +250,159 @@ st.markdown(
 )
 
 # Streamlit app
-st.markdown('<div class="header"><h1>Stress Level Predictor</h1></div>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="main-header">
+        <h1>Stress Level Prediction App</h1>
+        <p>Predict stress level using wearable-style health indicators and receive supportive recommendations.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Sidebar for model explanation
 with st.sidebar:
-    st.header("About the Model")
-    st.write("This is an innovation-driven AI tool that predicts stress levels from wearable data (HRV, Activity, Sleep, BP, RR) using a neural network. Developed as a proof-of-concept for AI Systems Engineering.")
-
+    st.header("About this App")
+    st.write(
+        "This proof-of-concept application predicts stress levels using wearable-style indicators such as HRV, activity, sleep, blood pressure, and respiration rate."
+    )
+    st.markdown("**Model type:** Neural Network")
+    st.markdown("**Interface:** Streamlit")
+    st.markdown("**Optional chatbot:** Gemini API")
+    st.info("This app is not intended for medical diagnosis.")
 # Initialize session state
 if 'prediction' not in st.session_state:
     st.session_state['prediction'] = None
+
+if 'advice' not in st.session_state:
+    st.session_state['advice'] = None
+
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
 
-# Inputs as questions with explanations
-hrv_input = st.slider('What is your Heart Rate Variability (HRV, ms)?', 20.0, 100.0, 60.0, key="hrv")
-activity_input = st.slider('Daily Activity level (steps)?', 0, 20000, 10000, key="activity")
-sleep_input = st.slider('Hours of Sleep last night?', 4.0, 10.0, 7.0, key="sleep")
-bp_input = st.slider('Blood Pressure (mmHg, e.g., 120/80 average)?', 90.0, 160.0, 120.0, key="bp")  # Average BP
-rr_input = st.slider('Respiration Rate (breaths per minute)?', 12.0, 25.0, 16.0, key="rr")  # Normal range
+
+st.markdown("### Input Health and Activity Indicators")
+
+hrv_input = st.slider(
+    'Heart Rate Variability (HRV, ms)',
+    min_value=20,
+    max_value=100,
+    value=60,
+    step=1,
+    key="hrv"
+)
+
+activity_input = st.slider(
+    'Daily Activity Level (steps)',
+    min_value=0,
+    max_value=20000,
+    value=10000,
+    step=100,
+    key="activity"
+)
+
+sleep_input = st.slider(
+    'Sleep Duration (hours)',
+    min_value=4.0,
+    max_value=10.0,
+    value=7.0,
+    step=0.5,
+    format="%.1f",
+    key="sleep"
+)
+
+bp_input = st.slider(
+    'Blood Pressure (mmHg)',
+    min_value=90,
+    max_value=160,
+    value=120,
+    step=1,
+    key="bp"
+)
+
+rr_input = st.slider(
+    'Respiration Rate (breaths per minute)',
+    min_value=12,
+    max_value=25,
+    value=16,
+    step=1,
+    key="rr"
+)
+
+
 
 col1, col2 = st.columns(2)
+
 with col1:
     if st.button('Predict', key="predict_button"):
         # Prepare input data with 5 features
         input_data = np.array([[hrv_input, activity_input, sleep_input, bp_input, rr_input]])
         input_scaled = scaler.transform(input_data)
         input_t = torch.tensor(input_scaled, dtype=torch.float32)
-        
+
         # Predict
         with torch.no_grad():
             prediction = model(input_t).argmax().item()
             advice = generate_advice(prediction, hrv_input, activity_input, sleep_input, bp_input, rr_input)
-        
-        # Store prediction in session state
+
+        # Store prediction and advice in session state
         st.session_state['prediction'] = prediction
-        
-        # Display results with color
-        st.markdown('<div class="result-box">', unsafe_allow_html=True)
-        color_class = ["green-text", "yellow-text", "red-text"][prediction]
-        st.write(f'<span class="{color_class}">Predicted Stress Level: {["Low", "Medium", "High"][prediction]}</span>', unsafe_allow_html=True)
-        st.write(f'<span class="{color_class}">{advice}</span>', unsafe_allow_html=True)
-        
-        # Stress level progress bar
-        st.progress(prediction / 2)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Update and display plot with normalized values
-        fig, ax = plt.subplots(figsize=(10, 6))
-        normalized_values = [hrv_input / 10, activity_input / 1000, sleep_input, bp_input / 100, rr_input / 10]
-        ax.bar(['HRV/10', 'Act/1000', 'Sleep', 'BP/100', 'RR/10'], normalized_values, color=['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f'])
-        ax.set_ylabel('Normalized Values')
-        st.pyplot(fig, clear_figure=True)
-
-    # Chat section with chat_input and session_state
-    st.markdown('<div class="chat-box">', unsafe_allow_html=True)
-    st.write("If you can't follow the advice, share your feelings here:")
-    if 'chat_history' not in st.session_state:
-        st.session_state['chat_history'] = []
-    if 'prediction' not in st.session_state:
-        st.session_state['prediction'] = None
-
-    user_chat = st.chat_input("Your thoughts...")
-    if user_chat and st.session_state['prediction'] is not None:
-        st.session_state['chat_history'].append(("user", user_chat))
-        chat_reply = chat_with_llm(user_chat, st.session_state['prediction'])
-        st.session_state['chat_history'].append(("assistant", chat_reply))
-
-    # Display chat history
-    for role, message in st.session_state['chat_history']:
-        if role == "user":
-            st.write(f"<span style='color: #34495e;'>You: {message}</span>", unsafe_allow_html=True)
-        elif role == "assistant":
-            st.write(f"<span style='color: #2c3e50;'>Bot: {message}</span>", unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.session_state['advice'] = advice
 
 with col2:
     if st.button('Reset Inputs', key="reset_button"):
         st.session_state['prediction'] = None
+        st.session_state['advice'] = None
         st.session_state['chat_history'] = []
         st.rerun()
+    
+if st.session_state['prediction'] is not None:
+    prediction = st.session_state['prediction']
+    advice = st.session_state['advice']
+
+    stress_label = ["Low", "Medium", "High"][prediction]
+    result_class = ["low-result", "medium-result", "high-result"][prediction]
+
+    st.markdown(
+        f"""
+        <div class="result-box {result_class}">
+            <div class="result-title">Predicted Stress Level: {stress_label}</div>
+            <div class="recommendation-text">{advice}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+#Optional chatbot section
+with st.expander("Optional Supportive Chatbot"):
+    st.write("Share your thoughts if you would like additional supportive suggestions.")
+
+    if st.session_state['prediction'] is None:
+        st.info("Please predict your stress level first to enable the chatbot.")
+    else:
+        user_chat = st.text_area(
+            "Your thoughts",
+            placeholder="Write how you feel or what is difficult to follow...",
+            key="chat_text"
+        )
+
+        if st.button("Send Message", key="send_chat_button"):
+            if user_chat.strip():
+                st.session_state['chat_history'].append(("user", user_chat))
+                chat_reply = chat_with_llm(user_chat, st.session_state['prediction'])
+                st.session_state['chat_history'].append(("assistant", chat_reply))
+            else:
+                st.warning("Please write a message before sending.")
+
+        for role, message in st.session_state['chat_history']:
+            if role == "user":
+                st.markdown(f"**You:** {message}")
+            elif role == "assistant":
+                st.markdown(f"**Bot:** {message}")
+
 
 # Footer
-st.markdown("<p style='text-align: center; color: #7f8c8d;'>Developed by Mahshad Memarifard | 2025</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p class='footer-text'>Developed by Mahshad Memarifard | 2025</p>",
+    unsafe_allow_html=True
+)
